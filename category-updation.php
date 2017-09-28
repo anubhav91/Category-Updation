@@ -1,5 +1,4 @@
 <?php
-
 /*
   Plugin Name: Category Updation
   Version: 1.0
@@ -54,12 +53,12 @@ add_action('wp_fetch_categories', 'fetch_categories');
 
 function fetch_categories() {
     //API URL
-    $url = ''; //Put actual URL here
-    
+    $url = get_option('category_update_api_url');
+
     if (empty($url)) {
         wp_send_json_error('URL missing.');
     }
-    
+
     $json = wp_remote_get($url);
 
     $id_array_map = [];
@@ -164,3 +163,47 @@ function fields_html() {
  */
 add_action('wp_ajax_fetch_categories_action', 'fetch_categories');
 add_action('wp_ajax_nopriv_fetch_categories_action', 'fetch_categories');
+
+
+add_action('admin_menu', 'category_admin_func');
+
+function category_admin_func() {
+    add_menu_page('Category Add Url', 'Category Add Url', 'manage_options', 'category_add_url', 'category_update_method');
+}
+
+function category_update_method() {
+    $plugin_main_url = site_url() . '/wp-admin/admin.php?page=category_add_url';
+    $existing_val = get_option('category_update_api_url');
+    
+    if (isset($_POST['submit'])) {
+        $url = $_POST['api_url'];
+
+        if (!empty($url) && filter_var($url, FILTER_VALIDATE_URL) !== FALSE) {
+            if (empty($existing_val)) {
+                add_option('category_update_api_url', $url);
+            } else {
+                update_option('category_update_api_url', $url);
+            }
+            echo '<script>alert("Data has been submitted successfully.");window.location="' . $plugin_main_url . '";</script>';
+        } else {
+            echo '<script>alert("Kindly provide correct API Url.");window.location="' . $plugin_main_url . '";</script>';
+        }
+    }
+    ?>
+    <h3>Category Updation API URL</h3>
+    <form method="post" action="">
+        <table>
+            <tbody>
+                <tr>
+                    <td>API URL</td>
+                    <td> <input required placeholder="URL" value="<?php echo $existing_val; ?>" type="text" name="api_url"></td>
+                </tr>
+
+                <tr>
+                    <td><input type="submit" value="Submit" name="submit"></td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+    <?php
+}
