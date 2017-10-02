@@ -207,3 +207,19 @@ function category_update_method() {
     </form>
     <?php
 }
+
+/*
+* This will disable category add and edit functionality of wordpress.
+*/
+function custom_admin_js() {
+   echo '<script type="text/javascript">
+       jQuery(document).ready(function(){
+           jQuery("#addtag").html("<b>Disabled</b>");
+           jQuery(".taxonomy-category tr .name .row-title").attr("href", "javascript:void(0);");
+           jQuery(".taxonomy-category tr .row-actions .edit").html("");
+           jQuery(".taxonomy-category tr .row-actions .inline").html("");
+       });
+   </script>';
+}
+
+add_action('admin_footer', 'custom_admin_js');
